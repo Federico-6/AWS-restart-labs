@@ -116,7 +116,7 @@ aws s3api put-bucket-policy \
 2. Choose the S3 bucket created at **STEP 2**.
 3. Under *Objects*, select *Upload*.
 4. Upload your chosen file.
-	**Optional:** Use the [aws-s3](sample file path) picture.
+	**Optional:** Use the [aws-s3](/assets/aws-s3.jpg) picture.
 ### STEP 3.2: Access the object
 1. Select the desired object uploaded inside the bucket.
 
