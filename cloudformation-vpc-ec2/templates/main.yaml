@@ -1,0 +1,96 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: VPC and EC2 template
+
+# VPC with IGW, private subnet, SG, and EC2 instance
+
+Parameters:
+  VpcCidr:
+    Type: String
+    Default: 10.0.0.0/16
+  
+  PrivateSubnetCidr:
+    Type: String
+    Default: 10.0.0.0/24
+
+  AmazonLinuxAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+Resources:
+
+##############################
+# VPC & Core Networking
+##############################
+
+  LabVpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: !Ref VpcCidr
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: Lab VPC
+
+  LabIgw:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: Lab IGW
+
+  VpcGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref LabIgw
+      VpcId: !Ref LabVpc
+
+##############################
+# Private Subnet
+##############################
+
+  LabVpcPrivateSubnetA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref LabVpc
+      CidrBlock: !Ref PrivateSubnetCidr
+      AvailabilityZone: us-west-2a
+      Tags:
+      - Key: Name
+        Value: Private Subnet A
+
+##############################
+# Security Group
+##############################
+
+  LabSg:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow SSH to the public
+      VpcId: !Ref LabVpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '22'
+          ToPort: '22'
+          CidrIp: 0.0.0.0/0
+
+##############################
+# EC2 Instance
+##############################
+
+  LabInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      ImageId: !Ref AmazonLinuxAmiId
+      InstanceType: t3.micro
+      SecurityGroupIds:
+        - !Ref LabSg
+      SubnetId: !Ref LabVpcPrivateSubnetA
+      Tags:
+        - Key: Name
+          Value: Lab Instance
+
+
+
+
+
